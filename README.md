@@ -1,93 +1,175 @@
-# PAM_Signal_Integrity_Automation
+# PAM-N Signal Integrity Automator
 
+**Automated signal integrity analysis for Automotive Ethernet PAM-N signals using the R&S RTP oscilloscope.**
 
+Developed by R&S Application Engineering to streamline 2.5 / 5 / 10 GBASE-T1 measurements that would otherwise require many manual steps on the instrument.
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Overview
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+This tool provides a graphical interface that controls an R&S RTP oscilloscope over a network connection (TCPIP/VISA). It automates signal configuration, eye diagram setup, and advanced jitter decomposition — replacing repetitive manual instrument operation with a single button press.
 
-## Add your files
+---
 
-* [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## Files
+
+| File | Purpose |
+|---|---|
+| `PAM_AE_SignalIntegrity_GUI.py` | Main application — run this to launch the tool |
+| `PAM_AE_SignalIntegrity_Backend.py` | Instrument automation functions (SCPI over VISA) |
+
+---
+
+## Requirements
+
+**Python 3.10 or higher**
+
+Install dependencies:
+
+```bash
+pip install RsInstrument
+```
+
+Tkinter is included with standard Python on Windows. No other packages required.
+
+---
+
+## How to Run
+
+```bash
+python PAM_AE_SignalIntegrity_GUI.py
+```
+
+---
+
+## Features
+
+### Signal Configuration
+- Selectable channel pair: CH1+CH3 or CH2+CH4
+- Creates a DIFF1 differential signal automatically
+- Technology presets: 2.5 / 5 / 10 GBASE-T1
+- Configurable vertical and horizontal scaling
+- Factory preset + full reconfiguration in one click
+
+### Eye Diagram
+- **Software CDR**: Whole eye, specific eye (Eye1/2/3), or selected transition
+- **Hardware CDR**: CDR trigger lock with optional zoom window
+  - Zoom coordinates configurable in nanoseconds
+  - Zoom window automatically removed and recreated on each run
+
+### Jitter Analysis
+- **Quick Start**: Fully automatic — instrument detects bit rate and enables all components
+- **Manual Components**: Select any combination of DDJ, RJ, TJ, DJ, PJ, DCD
+- **PAM-N Results**: Transition-dependent histograms for all six PAM-4 rising transitions (0→1, 0→2, 0→3, 1→2, 1→3, 2→3)
+
+### Workflow Intelligence
+- Switching **Jitter → Eye**: jitter results display turned off automatically before eye setup
+- Switching **HW CDR → SW CDR**: zoom window removed, trigger reset to EDGE automatically
+- Switching **Quick Start → Manual/PAM-N**: Step Response, DDJ Bathtub, DDN Bathtub disabled automatically
+- Heavy operations (CLEJitcomp, CATegory:ADD) use a polling strategy with live progress ticks — no VISA timeout regardless of instrument computation time
+
+---
+
+## Instrument Connection
+
+1. Connect the R&S RTP oscilloscope to the same network as your PC
+2. Find the instrument IP address on the scope: **Setup → Network**
+3. Enter the IP in the **Connection** tab and click **Connect**
+
+Default IP pre-filled: `10.103.34.23` — change this to match your instrument.
+
+---
+
+## Building a Standalone Executable
+
+To distribute the tool without requiring Python to be installed:
+
+```bash
+pip install cx_freeze
+python setup.py build
+```
+
+The `build/` folder will contain `SignalIntegrityAutomator.exe` and all dependencies. Use `setup.py` from the repository.
+
+---
+
+## Repository Structure
 
 ```
-cd existing_repo
-git remote add origin https://code.rsint.net/inneRSource/python/pam_signal_integrity_automation.git
-git branch -M main
-git push -uf origin main
+pam_signal_integrity_autom/
+├── PAM_AE_SignalIntegrity_GUI.py       # GUI entry point
+├── PAM_AE_SignalIntegrity_Backend.py   # SCPI automation backend
+├── setup.py                            # cx_Freeze build configuration
+└── README.md                           # This file
 ```
 
-## Integrate with your tools
+---
 
-* [Set up project integrations](https://code.rsint.net/inneRSource/python/pam_signal_integrity_automation/-/settings/integrations)
+## Contributing / Updating
 
-## Collaborate with your team
+This project follows a standard Git workflow. See the [Git usage guide](#git-usage) below.
 
-* [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### Git Usage
 
-## Test and Deploy
+**One-time setup — clone the repository to your PC:**
 
-Use the built-in continuous integration in GitLab.
+```bash
+git clone https://code.rsint.net/inneRSource/python/pam_signal_integrity_autom
+cd pam_signal_integrity_autom
+```
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+**Every time you make a change:**
 
-***
+```bash
+# 1. Get the latest version before starting work
+git pull
 
-# Editing this README
+# 2. Edit your files
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+# 3. Stage the files you changed
+git add PAM_AE_SignalIntegrity_Backend.py PAM_AE_SignalIntegrity_GUI.py
 
-## Suggestions for a good README
+# 4. Commit with a short description of what changed
+git commit -m "Brief description of change"
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+# 5. Push to GitLab
+git push
+```
 
-## Name
-Choose a self-explaining name for your project.
+**Commit message conventions:**
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+| Prefix | Use for |
+|---|---|
+| `fix:` | Bug fixes |
+| `feat:` | New features |
+| `refactor:` | Code cleanup with no behaviour change |
+| `docs:` | README or comment updates |
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Examples:
+```
+fix: resolve zoom -222 error when coming from jitter
+feat: add TJ@BER component to manual jitter selection
+docs: update README with network setup instructions
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+---
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## SCPI Reference
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+All SCPI commands are sourced from the **R&S RTP Oscilloscope User Manual**.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Key command areas used:
+- `ADVJitter1:*` — Advanced jitter decomposition (instance 1)
+- `EYE1:*` — Eye diagram configuration
+- `TRIGger1:TYPE CDR` — Hardware CDR trigger
+- `LAYout:ZOOM:ADD / REMove` — Zoom window management
+- `SIGNalconfig:SETup:ADD` — Technology standard preset
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+---
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## Known Instrument Behaviour
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- The HW CDR zoom window may take a few seconds to render after being created — this is normal instrument pipeline behaviour, not a code issue.
+- `CLEJitcomp` (jitter decomposition reset) can take 60–120 seconds depending on signal complexity. The log shows live progress ticks every 15 seconds.
+- 10GBASE-T1 at ~3.8 GBd symbol rate may not lock with HW CDR — SW CDR is recommended for this standard.
