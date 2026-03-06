@@ -694,3 +694,4 @@ def connect_instrument(
     except Exception as e:
         log(f"❌ Connection failed: {e}")
         raise
+
