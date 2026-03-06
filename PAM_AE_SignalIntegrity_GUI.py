@@ -387,13 +387,6 @@ class SignalIntegrityAutomator(tk.Tk):
                   relief='flat', cursor='hand2', height=2).pack(
             side='left', fill='x', expand=True, padx=(4, 0))
 
-        tk.Label(tab,
-                 text="💡 'Preset + Config' resets scope and re-runs signal config before eye setup\n"
-                      "    SW→HW CDR: switches trigger + zoom only (no preset needed)\n"
-                      "    HW→SW CDR: removes zoom, resets trigger, then runs SW CDR (no preset needed)\n"
-                      "    Jitter→Eye: jitter results display turned off automatically",
-                 font=('Segoe UI', 8, 'italic'), bg='white', fg='#6c757d').pack(pady=(0, 8))
-
         self._update_zoom_options()  # hide zoom fields on startup
         self.technology.trace_add('write', lambda *_: self._update_hw_cdr_warning())
 
@@ -463,8 +456,14 @@ class SignalIntegrityAutomator(tk.Tk):
                        variable=self.jitter_type, value="pamn", bg='white',
                        font=('Segoe UI', 9), command=self.update_jitter_options).pack(anchor='w', pady=3)
 
+        # Fixed container — option frames grid here so buttons below never move
+        self.jitter_options_container = tk.Frame(tab, bg='white')
+        self.jitter_options_container.pack(fill='x', padx=20, pady=(0, 6))
+        self.jitter_options_container.grid_columnconfigure(0, weight=1)
+
         # ── Manual components frame ───────────────────────────────────────────
-        self.manual_frame = tk.LabelFrame(tab, text="Select Components",
+        self.manual_frame = tk.LabelFrame(self.jitter_options_container,
+                                          text="Select Components",
                                           font=('Segoe UI', 10, 'bold'), bg='white', fg='#003366',
                                           padx=15, pady=10)
         self.jitter_components = {}
@@ -481,7 +480,8 @@ class SignalIntegrityAutomator(tk.Tk):
                 row=i // 2, column=i % 2, sticky='w', padx=10, pady=3)
 
         # ── PAM-N frame ───────────────────────────────────────────────────────
-        self.pamn_frame = tk.LabelFrame(tab, text="PAM-N Configuration",
+        self.pamn_frame = tk.LabelFrame(self.jitter_options_container,
+                                        text="PAM-N Configuration",
                                         font=('Segoe UI', 10, 'bold'), bg='white', fg='#003366',
                                         padx=15, pady=10)
 
@@ -500,12 +500,12 @@ class SignalIntegrityAutomator(tk.Tk):
         trans_frame = tk.Frame(self.pamn_frame, bg='white')
         trans_frame.pack(fill='x')
         self.transitions = {}
-        for i, (label, base, target) in enumerate(
+        for i, (lbl, base, target) in enumerate(
                 [('0→1', 0, 1), ('0→2', 0, 2), ('0→3', 0, 3),
                  ('1→2', 1, 2), ('1→3', 1, 3), ('2→3', 2, 3)]):
             var = tk.BooleanVar(value=False)
             self.transitions[(base, target)] = var
-            tk.Checkbutton(trans_frame, text=label, variable=var,
+            tk.Checkbutton(trans_frame, text=lbl, variable=var,
                            bg='white', font=('Segoe UI', 9)).grid(
                 row=i // 3, column=i % 3, sticky='w', padx=10, pady=3)
 
@@ -520,6 +520,7 @@ class SignalIntegrityAutomator(tk.Tk):
                   bg='#6c757d', fg='white', font=('Segoe UI', 8),
                   relief='flat', padx=10, pady=4).pack(side='left', padx=5)
 
+        # Buttons always below the container — never displaced by option frames
         btn_frame = tk.Frame(tab, bg='white')
         btn_frame.pack(fill='x', padx=20, pady=12)
 
@@ -535,22 +536,16 @@ class SignalIntegrityAutomator(tk.Tk):
                   relief='flat', cursor='hand2', height=2).pack(
             side='left', fill='x', expand=True, padx=(4, 0))
 
-        tk.Label(tab,
-                 text="💡 Quick Start → Manual / PAM-N: Step Response, DDJ Bathtub and DDN Bathtub "
-                      "are turned off automatically\n"
-                      "    Jitter → Eye: jitter results display turned off automatically",
-                 font=('Segoe UI', 8, 'italic'), bg='white', fg='#6c757d').pack(pady=(0, 8))
-
         return tab
 
     def update_jitter_options(self):
-        self.manual_frame.pack_forget()
-        self.pamn_frame.pack_forget()
+        self.manual_frame.grid_remove()
+        self.pamn_frame.grid_remove()
         jt = self.jitter_type.get()
         if jt == "manual":
-            self.manual_frame.pack(fill='x', padx=20, pady=(0, 8))
+            self.manual_frame.grid(row=0, column=0, sticky='ew')
         elif jt == "pamn":
-            self.pamn_frame.pack(fill='x', padx=20, pady=(0, 8))
+            self.pamn_frame.grid(row=0, column=0, sticky='ew')
 
     # =========================================================================
     # SHARED HELPERS
