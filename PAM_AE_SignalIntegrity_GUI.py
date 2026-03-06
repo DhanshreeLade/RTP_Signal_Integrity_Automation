@@ -120,65 +120,55 @@ class SignalIntegrityAutomator(tk.Tk):
         self.notebook = ttk.Notebook(self.left_panel)
         self.notebook.pack(fill='both', expand=True, padx=5, pady=5)
 
-        self.notebook.add(self.create_connection_tab(),    text="Connection")
         self.notebook.add(self.create_signal_config_tab(), text="Signal Config")
         self.notebook.add(self.create_eye_tab(),           text="Eye Diagram")
         self.notebook.add(self.create_jitter_tab(),        text="Jitter Analysis")
 
     # =========================================================================
-    # CONNECTION TAB
-    # =========================================================================
-    def create_connection_tab(self):
-        tab = tk.Frame(self.notebook, bg='white')
-        main = tk.Frame(tab, bg='white')
-        main.pack(fill='both', expand=True, padx=12, pady=12)
-
-        conn_sec = tk.Frame(main, bg='#f8f9fa', relief='solid', borderwidth=1)
-        conn_sec.pack(fill='x', pady=(0, 12))
-        tk.Label(conn_sec, text="🔌 Connection", font=('Segoe UI', 10, 'bold'),
-                 bg='#f8f9fa', fg='#003366').pack(anchor='w', padx=12, pady=(10, 8))
-
-        content = tk.Frame(conn_sec, bg='#f8f9fa')
-        content.pack(fill='x', padx=12, pady=(0, 10))
-
-        tk.Label(content, text="IP Address:", bg='#f8f9fa',
-                 font=('Segoe UI', 9, 'bold')).pack(anchor='w', pady=(0, 2))
-        self.ip_entry = tk.Entry(content, font=('Segoe UI', 10))
-        self.ip_entry.insert(0, "10.103.34.23")
-        self.ip_entry.pack(fill='x', pady=(0, 8))
-
-        self.connect_btn = tk.Button(
-            content, text="Connect to Instrument", command=self.connect,
-            bg='#28a745', fg='white', font=('Segoe UI', 10, 'bold'),
-            relief='flat', cursor='hand2', height=2)
-        self.connect_btn.pack(fill='x', pady=(0, 8))
-
-        self.status_label = tk.Label(
-            content, text="● Disconnected", font=('Segoe UI', 9, 'bold'),
-            bg='#f8d7da', fg='#721c24', relief='solid', borderwidth=1, pady=5)
-        self.status_label.pack(fill='x')
-
-        self.disconnect_btn = tk.Button(
-            content, text="Disconnect", command=self.disconnect,
-            bg='#dc3545', fg='white', font=('Segoe UI', 10, 'bold'),
-            relief='flat', cursor='hand2', height=2, state=tk.DISABLED)
-        self.disconnect_btn.pack(fill='x', pady=(8, 0))
-        self.disconnect_btn.pack_forget()
-
-        tk.Label(main, text="💡 Connect to oscilloscope before configuring measurements",
-                 bg='#e7f3ff', fg='#004085', font=('Segoe UI', 9),
-                 relief='solid', borderwidth=1, padx=12, pady=10).pack(fill='x')
-
-        return tab
-
-    # =========================================================================
-    # SIGNAL CONFIG TAB
+    # SIGNAL CONFIG TAB (includes instrument connection at top)
     # =========================================================================
     def create_signal_config_tab(self):
         tab = tk.Frame(self.notebook, bg='white')
         main = tk.Frame(tab, bg='white')
         main.pack(fill='both', expand=True, padx=12, pady=12)
 
+        # ── Instrument Connection ─────────────────────────────────────────────
+        conn_sec = tk.Frame(main, bg='#f8f9fa', relief='solid', borderwidth=1)
+        conn_sec.pack(fill='x', pady=(0, 12))
+        tk.Label(conn_sec, text="🔌 Instrument Connection",
+                 font=('Segoe UI', 10, 'bold'), bg='#f8f9fa', fg='#003366').pack(
+            anchor='w', padx=12, pady=(10, 8))
+
+        conn_content = tk.Frame(conn_sec, bg='#f8f9fa')
+        conn_content.pack(fill='x', padx=12, pady=(0, 10))
+
+        ip_row = tk.Frame(conn_content, bg='#f8f9fa')
+        ip_row.pack(fill='x', pady=(0, 8))
+        tk.Label(ip_row, text="IP Address:", bg='#f8f9fa',
+                 font=('Segoe UI', 9, 'bold'), width=10, anchor='w').pack(side='left')
+        self.ip_entry = tk.Entry(ip_row, font=('Segoe UI', 10))
+        self.ip_entry.insert(0, "10.103.34.23")
+        self.ip_entry.pack(side='left', fill='x', expand=True, padx=(8, 0))
+
+        self.status_label = tk.Label(
+            conn_content, text="● Disconnected", font=('Segoe UI', 9, 'bold'),
+            bg='#f8d7da', fg='#721c24', relief='solid', borderwidth=1, pady=5)
+        self.status_label.pack(fill='x', pady=(0, 8))
+
+        btn_row = tk.Frame(conn_content, bg='#f8f9fa')
+        btn_row.pack(fill='x')
+        self.connect_btn = tk.Button(
+            btn_row, text="Connect", command=self.connect,
+            bg='#28a745', fg='white', font=('Segoe UI', 9, 'bold'),
+            relief='flat', cursor='hand2', height=2)
+        self.connect_btn.pack(side='left', fill='x', expand=True, padx=(0, 4))
+        self.disconnect_btn = tk.Button(
+            btn_row, text="Disconnect", command=self.disconnect,
+            bg='#dc3545', fg='white', font=('Segoe UI', 9, 'bold'),
+            relief='flat', cursor='hand2', height=2, state=tk.DISABLED)
+        self.disconnect_btn.pack(side='left', fill='x', expand=True, padx=(4, 0))
+
+        # ── Channel Configuration ─────────────────────────────────────────────
         config_sec = tk.Frame(main, bg='#f8f9fa', relief='solid', borderwidth=1)
         config_sec.pack(fill='x', pady=(0, 12))
         tk.Label(config_sec, text="⚙️ Channel Configuration",
@@ -500,12 +490,12 @@ class SignalIntegrityAutomator(tk.Tk):
         trans_frame = tk.Frame(self.pamn_frame, bg='white')
         trans_frame.pack(fill='x')
         self.transitions = {}
-        for i, (lbl, base, target) in enumerate(
+        for i, (label, base, target) in enumerate(
                 [('0→1', 0, 1), ('0→2', 0, 2), ('0→3', 0, 3),
                  ('1→2', 1, 2), ('1→3', 1, 3), ('2→3', 2, 3)]):
             var = tk.BooleanVar(value=False)
             self.transitions[(base, target)] = var
-            tk.Checkbutton(trans_frame, text=lbl, variable=var,
+            tk.Checkbutton(trans_frame, text=label, variable=var,
                            bg='white', font=('Segoe UI', 9)).grid(
                 row=i // 3, column=i % 3, sticky='w', padx=10, pady=3)
 
@@ -520,7 +510,6 @@ class SignalIntegrityAutomator(tk.Tk):
                   bg='#6c757d', fg='white', font=('Segoe UI', 8),
                   relief='flat', padx=10, pady=4).pack(side='left', padx=5)
 
-        # Buttons always below the container — never displaced by option frames
         btn_frame = tk.Frame(tab, bg='white')
         btn_frame.pack(fill='x', padx=20, pady=12)
 
@@ -589,7 +578,6 @@ class SignalIntegrityAutomator(tk.Tk):
                 self.after(0, lambda: self.status_label.config(
                     text="● Connected", bg='#d4edda', fg='#155724'))
                 self.after(0, lambda: self.connect_btn.config(state=tk.DISABLED))
-                self.after(0, lambda: self.disconnect_btn.pack(fill='x', pady=(8, 0)))
                 self.after(0, lambda: self.disconnect_btn.config(state=tk.NORMAL))
                 self.after(0, lambda: self.signal_config_btn.config(state=tk.NORMAL))
             except Exception as e:
@@ -612,7 +600,6 @@ class SignalIntegrityAutomator(tk.Tk):
         self.status_label.config(text="● Disconnected", bg='#f8d7da', fg='#721c24')
         self.connect_btn.config(state=tk.NORMAL)
         self.disconnect_btn.config(state=tk.DISABLED)
-        self.disconnect_btn.pack_forget()
         self.signal_config_btn.config(state=tk.DISABLED)
 
     # =========================================================================
