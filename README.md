@@ -63,13 +63,6 @@ python PAM_AE_SignalIntegrity_GUI.py
 - **Manual Components**: Select any combination of DDJ, RJ, TJ, DJ, PJ, DCD
 - **PAM-N Results**: Transition-dependent histograms for all six PAM-4 rising transitions (0→1, 0→2, 0→3, 1→2, 1→3, 2→3)
 
-### Workflow Intelligence
-- Switching **Jitter → Eye**: jitter results display turned off automatically before eye setup
-- Switching **HW CDR → SW CDR**: zoom window removed, trigger reset to EDGE automatically
-- Switching **Quick Start → Manual/PAM-N**: Step Response, DDJ Bathtub, DDN Bathtub disabled automatically
-- Heavy operations (CLEJitcomp, CATegory:ADD) use a polling strategy with live progress ticks — no VISA timeout regardless of instrument computation time
-
----
 
 ## Instrument Connection
 
